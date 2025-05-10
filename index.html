@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Phrasal Verb Quiz</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    .question { margin-bottom: 20px; }
+    button { margin: 5px; }
+  </style>
+</head>
+<body>
+
+  <h1>Phrasal Verb Quiz</h1>
+  <div id="quiz-container"></div>
+  <button onclick="nextQuestion()">Next Question</button>
+
+  <script>
+    const data = [
+      { verb: "add up", meaning: "hợp lý / tính tổng", example: "His story doesn’t add up." },
+      { verb: "break down", meaning: "hỏng hóc / suy sụp", example: "My car broke down." },
+      { verb: "break in", meaning: "đột nhập", example: "Someone broke in last night." },
+      { verb: "break into", meaning: "đột nhập vào", example: "Thieves broke into the store." },
+      { verb: "break out", meaning: "bùng phát", example: "A fire broke out in the kitchen." },
+      { verb: "break through", meaning: "đột phá", example: "The scientist made a breakthrough in cancer research." }
+    ];
+
+    let currentQuestion = 0;
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function nextQuestion() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = '';
+
+      const correct = data[Math.floor(Math.random() * data.length)];
+      const options = shuffle([correct, ...shuffle(data.filter(d => d !== correct)).slice(0, 3)]);
+
+      const qDiv = document.createElement('div');
+      qDiv.className = 'question';
+      qDiv.innerHTML = `<strong>Câu hỏi:</strong> "${correct.meaning}" nghĩa là phrasal verb nào?<br><em>Ví dụ: ${correct.example}</em>`;
+      container.appendChild(qDiv);
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.textContent = opt.verb;
+        btn.onclick = () => {
+          if (opt === correct) {
+            alert('✅ Chính xác!');
+          } else {
+            alert(`❌ Sai rồi. Đáp án đúng là "${correct.verb}"`);
+          }
+          nextQuestion();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    nextQuestion();
+  </script>
+
+</body>
+</html>
