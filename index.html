@@ -138,13 +138,14 @@ let data = [];
 let currentIndex = 0;
 let correctCount = 0;
 let totalCount = 0;
+let isfalse = 0;
 
 const scoreDiv = document.getElementById("score");
 const correctSound = document.getElementById("correctSound");
 const wrongSound = document.getElementById("wrongSound");
 
 function updateScore() {
-  scoreDiv.textContent = `Đúng: ${correctCount} / ${totalCount}`;
+  scoreDiv.textContent = `Đúng: ${correctCount} / ${totalCount - 1}`;
 }
 
 async function fetchData() {
@@ -177,42 +178,67 @@ function nextQuestion() {
   totalCount++;
   updateScore();
 
-  document.getElementById("question").textContent = item.example;
+  // Chọn ngẫu nhiên kiểu câu hỏi: 0 = ví dụ -> nghĩa | 1 = nghĩa -> phrasal verb
+  const questionType = Math.random() < 0.5 ? 0 : 1;
 
-  let answers = [item.meaning];
-  let others = data.filter(d => d.meaning !== item.meaning);
-  shuffle(others);
-  others = others.slice(0, 3);
-  others.forEach(d => answers.push(d.meaning));
-  shuffle(answers);
+  let correctAnswer = "";
+  let questionText = "";
+  let allAnswers = [];
 
+  if (questionType === 0) {
+    // Từ ví dụ => chọn đúng nghĩa
+    questionText = item.example;
+    correctAnswer = item.meaning;
+    const others = data.filter(d => d.meaning !== item.meaning);
+    shuffle(others);
+    allAnswers = [correctAnswer, ...others.slice(0, 3).map(d => d.meaning)];
+  } else {
+    // Từ nghĩa => chọn đúng phrasal verb
+    questionText = item.meaning;
+    correctAnswer = item.verb;
+    const others = data.filter(d => d.verb !== item.verb);
+    shuffle(others);
+    allAnswers = [correctAnswer, ...others.slice(0, 3).map(d => d.verb)];
+  }
+
+  shuffle(allAnswers);
+
+  document.getElementById("question").textContent = questionText;
   const answersDiv = document.getElementById("answers");
   answersDiv.innerHTML = "";
 
-  answers.forEach(ans => {
+  allAnswers.forEach(ans => {
     const div = document.createElement("div");
     div.textContent = ans;
     div.className = "answer";
     div.onclick = () => {
-      if (ans === item.meaning) {
+      if (div.classList.contains("wrong") || div.classList.contains("correct")) {
+        // Đã chọn rồi, không làm gì nữa
+        return;
+      }
+      
+      if (ans === correctAnswer) {
+        // Khi chọn đúng thì khóa hết các đáp án
+        Array.from(answersDiv.children).forEach(child => child.style.pointerEvents = 'none');
         div.classList.add("correct");
-        correctCount++;
+        if(isfalse == 0) correctCount++;
+        else isfalse = 0;
         updateScore();
         correctSound.currentTime = 0;
         correctSound.play().catch(() => {});
-        Array.from(answersDiv.children).forEach(child => child.style.pointerEvents = 'none');
         setTimeout(nextQuestion, 1000);
       } else {
         div.classList.add("wrong");
         div.style.pointerEvents = "none";
         wrongSound.currentTime = 0;
         wrongSound.play().catch(() => {});
-        correctCount--;
+        isfalse = 1;
       }
     };
     answersDiv.appendChild(div);
   });
 }
+
 
 document.getElementById('resetBtn').onclick = () => {
   shuffle(data);
