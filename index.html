@@ -5,17 +5,157 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>English Phrasal Verbs Quiz</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 600px; margin: 2em auto; }
-  .answer { margin: 8px 0; padding: 8px; border: 1px solid #ccc; cursor: pointer; }
-  .answer.correct { background-color: #a8e6a3; }
-  .answer.wrong { display: none; }
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #e0e0e0;
+    font-family: 'Poppins', Arial, sans-serif;
+    padding: 40px 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    margin-bottom: 24px;
+    font-weight: 700;
+    font-size: 2.8rem;
+    text-shadow: 0 0 10px #48c6ef;
+    letter-spacing: 1.2px;
+    user-select: none;
+  }
+
+  #question {
+    font-size: 1.9rem;
+    font-weight: 600;
+    text-align: center;
+    max-width: 800px;
+    margin-bottom: 30px;
+    padding: 0 15px;
+    text-shadow:
+      1px 1px 3px rgba(0,0,0,0.8),
+      0 0 8px #48c6ef;
+  }
+
+  #answers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .answer {
+    background: linear-gradient(145deg, #1b2a38, #0f1a27);
+    border-radius: 16px;
+    padding: 22px 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    box-shadow:
+      6px 6px 15px #0b151e,
+      -6px -6px 15px #233645;
+    color: #a8c0ff;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .answer::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .answer:hover {
+    color: #66b0ff;
+    transform: translateY(-5px);
+    box-shadow:
+      6px 6px 20px #1153d1,
+      -6px -6px 20px #74aaff;
+  }
+
+  .answer.correct {
+    color: #fff;
+    background: #3cb371;
+    box-shadow:
+      0 0 12px #3cb371,
+      inset 0 0 10px #2e8b57;
+    animation: correctPulse 1s ease forwards;
+  }
+
+  .answer.wrong {
+    pointer-events: none;
+    animation: wrongFadeOut 0.5s forwards;
+  }
+
+  /* Animations */
+  @keyframes correctPulse {
+    0% { box-shadow: 0 0 12px #3cb371, inset 0 0 10px #2e8b57; }
+    50% { box-shadow: 0 0 18px #55d37a, inset 0 0 18px #3cb371; }
+    100% { box-shadow: 0 0 12px #3cb371, inset 0 0 10px #2e8b57; }
+  }
+
+  @keyframes wrongFadeOut {
+    to {
+      opacity: 0;
+      transform: scale(0.8);
+      height: 0;
+      margin: 0;
+      padding: 0;
+      pointer-events: none;
+    }
+  }
+
+  /* Reset button */
+  #resetBtn {
+    margin-top: 36px;
+    background: #48c6ef;
+    color: #0f2027;
+    border: none;
+    border-radius: 30px;
+    padding: 14px 32px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 5px 15px #38a4e5;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  #resetBtn:hover {
+    background-color: #2e8be6;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    #answers {
+      grid-template-columns: 1fr;
+    }
+    #question {
+      font-size: 1.5rem;
+      padding: 0 10px;
+    }
+  }
 </style>
 </head>
 <body>
 
-<h2>Chọn nghĩa đúng của câu sau:</h2>
+<h1>Chọn nghĩa đúng của câu sau:</h1>
 <div id="question"></div>
 <div id="answers"></div>
+<button id="resetBtn" title="Làm lại bài quiz">Làm lại bài quiz</button>
 
 <script>
 const url = "https://script.google.com/macros/s/AKfycbxAm9SvhJn5SEPYxGSysEuarr-liSh8EbiR79DR86LWWtVCh0pa7B7BMQlbCaY8WChUNA/exec";
@@ -26,6 +166,8 @@ let currentIndex = 0;
 async function fetchData() {
   const res = await fetch(url);
   data = await res.json();
+  shuffle(data);
+  currentIndex = 0;
   nextQuestion();
 }
 
@@ -38,8 +180,9 @@ function shuffle(array) {
 
 function nextQuestion() {
   if (currentIndex >= data.length) {
-    alert("Bạn đã làm xong bài quiz!");
+    alert("🎉 Bạn đã hoàn thành bài quiz!");
     currentIndex = 0;
+    shuffle(data);
   }
 
   const item = data[currentIndex];
@@ -69,15 +212,23 @@ function nextQuestion() {
     div.onclick = () => {
       if (ans === item.meaning) {
         div.classList.add("correct");
+        // Disable all other answers
+        Array.from(answersDiv.children).forEach(child => child.style.pointerEvents = 'none');
         setTimeout(nextQuestion, 1000);
       } else {
         div.classList.add("wrong");
-        div.style.display = "none";
+        div.style.pointerEvents = "none";
       }
     };
     answersDiv.appendChild(div);
   });
 }
+
+document.getElementById('resetBtn').onclick = () => {
+  shuffle(data);
+  currentIndex = 0;
+  nextQuestion();
+};
 
 fetchData();
 </script>
