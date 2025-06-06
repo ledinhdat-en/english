@@ -1,65 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Phrasal Verb Quiz</title>
-  <style>
-    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-    .question { margin-bottom: 20px; }
-    button { margin: 5px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>English Phrasal Verbs Quiz</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 600px; margin: 2em auto; }
+  .answer { margin: 8px 0; padding: 8px; border: 1px solid #ccc; cursor: pointer; }
+  .answer.correct { background-color: #a8e6a3; }
+  .answer.wrong { display: none; }
+</style>
 </head>
 <body>
 
-  <h1>Phrasal Verb Quiz</h1>
-  <div id="quiz-container"></div>
-  <button onclick="nextQuestion()">Next Question</button>
+<h2>Chọn nghĩa đúng của câu sau:</h2>
+<div id="question"></div>
+<div id="answers"></div>
 
-  <script>
-    const data = [
-      { verb: "add up", meaning: "hợp lý / tính tổng", example: "His story doesn’t add up." },
-      { verb: "break down", meaning: "hỏng hóc / suy sụp", example: "My car broke down." },
-      { verb: "break in", meaning: "đột nhập", example: "Someone broke in last night." },
-      { verb: "break into", meaning: "đột nhập vào", example: "Thieves broke into the store." },
-      { verb: "break out", meaning: "bùng phát", example: "A fire broke out in the kitchen." },
-      { verb: "break through", meaning: "đột phá", example: "The scientist made a breakthrough in cancer research." }
-    ];
+<script>
+const url = "https://script.google.com/macros/s/AKfycbxAm9SvhJn5SEPYxGSysEuarr-liSh8EbiR79DR86LWWtVCh0pa7B7BMQlbCaY8WChUNA/exec";
 
-    let currentQuestion = 0;
+let data = [];
+let currentIndex = 0;
 
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
-    }
+async function fetchData() {
+  const res = await fetch(url);
+  data = await res.json();
+  nextQuestion();
+}
 
-    function nextQuestion() {
-      const container = document.getElementById('quiz-container');
-      container.innerHTML = '';
+function shuffle(array) {
+  for (let i = array.length -1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
 
-      const correct = data[Math.floor(Math.random() * data.length)];
-      const options = shuffle([correct, ...shuffle(data.filter(d => d !== correct)).slice(0, 3)]);
+function nextQuestion() {
+  if (currentIndex >= data.length) {
+    alert("Bạn đã làm xong bài quiz!");
+    currentIndex = 0;
+  }
 
-      const qDiv = document.createElement('div');
-      qDiv.className = 'question';
-      qDiv.innerHTML = `<strong>Câu hỏi:</strong> "${correct.meaning}" nghĩa là phrasal verb nào?<br><em>Ví dụ: ${correct.example}</em>`;
-      container.appendChild(qDiv);
+  const item = data[currentIndex];
+  currentIndex++;
 
-      options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.textContent = opt.verb;
-        btn.onclick = () => {
-          if (opt === correct) {
-            alert('✅ Chính xác!');
-          } else {
-            alert(`❌ Sai rồi. Đáp án đúng là "${correct.verb}"`);
-          }
-          nextQuestion();
-        };
-        container.appendChild(btn);
-      });
-    }
+  // Hiển thị câu ví dụ (loại 3)
+  document.getElementById("question").textContent = item.example;
 
-    nextQuestion();
-  </script>
+  // Tạo 4 đáp án (nghĩa) gồm 1 đúng + 3 ngẫu nhiên
+  let answers = [item.meaning];
+
+  // Lấy 3 nghĩa ngẫu nhiên khác
+  let others = data.filter(d => d.meaning !== item.meaning);
+  shuffle(others);
+  others = others.slice(0, 3);
+  others.forEach(d => answers.push(d.meaning));
+
+  shuffle(answers);
+
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
+
+  answers.forEach(ans => {
+    const div = document.createElement("div");
+    div.textContent = ans;
+    div.className = "answer";
+    div.onclick = () => {
+      if (ans === item.meaning) {
+        div.classList.add("correct");
+        setTimeout(nextQuestion, 1000);
+      } else {
+        div.classList.add("wrong");
+        div.style.display = "none";
+      }
+    };
+    answersDiv.appendChild(div);
+  });
+}
+
+fetchData();
+</script>
 
 </body>
 </html>
