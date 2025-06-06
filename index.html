@@ -6,11 +6,7 @@
 <title>English Phrasal Verbs Quiz</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-
-  /* Reset and base */
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
   body {
     background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
     color: #e0e0e0;
@@ -21,16 +17,17 @@
     flex-direction: column;
     align-items: center;
   }
-
   h1 {
-    margin-bottom: 24px;
+    margin-bottom: 10px;
     font-weight: 700;
-    font-size: 2.8rem;
+    font-size: 2.4rem;
     text-shadow: 0 0 10px #48c6ef;
-    letter-spacing: 1.2px;
-    user-select: none;
   }
-
+  #score {
+    font-size: 1.1rem;
+    margin-bottom: 24px;
+    color: #a8c0ff;
+  }
   #question {
     font-size: 1.9rem;
     font-weight: 600;
@@ -38,11 +35,8 @@
     max-width: 800px;
     margin-bottom: 30px;
     padding: 0 15px;
-    text-shadow:
-      1px 1px 3px rgba(0,0,0,0.8),
-      0 0 8px #48c6ef;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px #48c6ef;
   }
-
   #answers {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -50,7 +44,6 @@
     width: 100%;
     max-width: 600px;
   }
-
   .answer {
     background: linear-gradient(145deg, #1b2a38, #0f1a27);
     border-radius: 16px;
@@ -60,54 +53,33 @@
     text-align: center;
     cursor: pointer;
     user-select: none;
-    box-shadow:
-      6px 6px 15px #0b151e,
-      -6px -6px 15px #233645;
+    box-shadow: 6px 6px 15px #0b151e, -6px -6px 15px #233645;
     color: #a8c0ff;
     transition: all 0.25s ease;
     position: relative;
     overflow: hidden;
   }
-
-  .answer::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    border-radius: 16px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-  }
-
   .answer:hover {
     color: #66b0ff;
     transform: translateY(-5px);
-    box-shadow:
-      6px 6px 20px #1153d1,
-      -6px -6px 20px #74aaff;
+    box-shadow: 6px 6px 20px #1153d1, -6px -6px 20px #74aaff;
   }
-
   .answer.correct {
     color: #fff;
     background: #3cb371;
-    box-shadow:
-      0 0 12px #3cb371,
-      inset 0 0 10px #2e8b57;
+    box-shadow: 0 0 12px #3cb371, inset 0 0 10px #2e8b57;
     animation: correctPulse 1s ease forwards;
   }
-
   .answer.wrong {
     pointer-events: none;
+    background: red;
     animation: wrongFadeOut 0.5s forwards;
   }
-
-  /* Animations */
   @keyframes correctPulse {
     0% { box-shadow: 0 0 12px #3cb371, inset 0 0 10px #2e8b57; }
     50% { box-shadow: 0 0 18px #55d37a, inset 0 0 18px #3cb371; }
     100% { box-shadow: 0 0 12px #3cb371, inset 0 0 10px #2e8b57; }
   }
-
   @keyframes wrongFadeOut {
     to {
       opacity: 0;
@@ -118,8 +90,6 @@
       pointer-events: none;
     }
   }
-
-  /* Reset button */
   #resetBtn {
     margin-top: 36px;
     background: #48c6ef;
@@ -137,8 +107,6 @@
   #resetBtn:hover {
     background-color: #2e8be6;
   }
-
-  /* Responsive */
   @media (max-width: 480px) {
     #answers {
       grid-template-columns: 1fr;
@@ -153,21 +121,40 @@
 <body>
 
 <h1>Chọn nghĩa đúng của câu sau:</h1>
+<div id="score">Đúng: 0 / 0</div>
 <div id="question"></div>
 <div id="answers"></div>
-<button id="resetBtn" title="Làm lại bài quiz">Làm lại bài quiz</button>
+<button id="resetBtn">Làm lại bài quiz</button>
+
+<!-- Âm thanh đúng & sai -->
+<audio id="correctSound" src="correct.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
+
 
 <script>
 const url = "https://script.google.com/macros/s/AKfycbxAm9SvhJn5SEPYxGSysEuarr-liSh8EbiR79DR86LWWtVCh0pa7B7BMQlbCaY8WChUNA/exec";
 
 let data = [];
 let currentIndex = 0;
+let correctCount = 0;
+let totalCount = 0;
+
+const scoreDiv = document.getElementById("score");
+const correctSound = document.getElementById("correctSound");
+const wrongSound = document.getElementById("wrongSound");
+
+function updateScore() {
+  scoreDiv.textContent = `Đúng: ${correctCount} / ${totalCount}`;
+}
 
 async function fetchData() {
   const res = await fetch(url);
   data = await res.json();
   shuffle(data);
   currentIndex = 0;
+  correctCount = 0;
+  totalCount = 0;
+  updateScore();
   nextQuestion();
 }
 
@@ -187,19 +174,16 @@ function nextQuestion() {
 
   const item = data[currentIndex];
   currentIndex++;
+  totalCount++;
+  updateScore();
 
-  // Hiển thị câu ví dụ (loại 3)
   document.getElementById("question").textContent = item.example;
 
-  // Tạo 4 đáp án (nghĩa) gồm 1 đúng + 3 ngẫu nhiên
   let answers = [item.meaning];
-
-  // Lấy 3 nghĩa ngẫu nhiên khác
   let others = data.filter(d => d.meaning !== item.meaning);
   shuffle(others);
   others = others.slice(0, 3);
   others.forEach(d => answers.push(d.meaning));
-
   shuffle(answers);
 
   const answersDiv = document.getElementById("answers");
@@ -212,12 +196,18 @@ function nextQuestion() {
     div.onclick = () => {
       if (ans === item.meaning) {
         div.classList.add("correct");
-        // Disable all other answers
+        correctCount++;
+        updateScore();
+        correctSound.currentTime = 0;
+        correctSound.play().catch(() => {});
         Array.from(answersDiv.children).forEach(child => child.style.pointerEvents = 'none');
         setTimeout(nextQuestion, 1000);
       } else {
         div.classList.add("wrong");
         div.style.pointerEvents = "none";
+        wrongSound.currentTime = 0;
+        wrongSound.play().catch(() => {});
+        correctCount--;
       }
     };
     answersDiv.appendChild(div);
@@ -227,6 +217,9 @@ function nextQuestion() {
 document.getElementById('resetBtn').onclick = () => {
   shuffle(data);
   currentIndex = 0;
+  correctCount = 0;
+  totalCount = 0;
+  updateScore();
   nextQuestion();
 };
 
