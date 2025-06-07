@@ -1,256 +1,35 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>English Phrasal Verbs Quiz</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-  * { box-sizing: border-box; }
-  body {
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: #e0e0e0;
-    font-family: 'Poppins', Arial, sans-serif;
-    padding: 40px 20px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  h1 {
-    margin-bottom: 10px;
-    font-weight: 700;
-    font-size: 2.4rem;
-    text-shadow: 0 0 10px #48c6ef;
-  }
-  #score {
-    font-size: 1.1rem;
-    margin-bottom: 24px;
-    color: #a8c0ff;
-  }
-  #question {
-    font-size: 1.9rem;
-    font-weight: 600;
-    text-align: center;
-    max-width: 800px;
-    margin-bottom: 30px;
-    padding: 0 15px;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px #48c6ef;
-  }
-  #answers {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    width: 100%;
-    max-width: 600px;
-  }
-  .answer {
-    background: linear-gradient(145deg, #1b2a38, #0f1a27);
-    border-radius: 16px;
-    padding: 22px 0;
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-align: center;
-    cursor: pointer;
-    user-select: none;
-    box-shadow: 6px 6px 15px #0b151e, -6px -6px 15px #233645;
-    color: #a8c0ff;
-    transition: all 0.25s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  .answer:hover {
-    color: #66b0ff;
-    transform: translateY(-5px);
-    box-shadow: 6px 6px 20px #1153d1, -6px -6px 20px #74aaff;
-  }
-  .answer.correct {
-    color: #fff;
-    background: #3cb371;
-    box-shadow: 0 0 12px #3cb371, inset 0 0 10px #2e8b57;
-    animation: correctPulse 1s ease forwards;
-  }
-  .answer.wrong {
-    pointer-events: none;
-    background: red;
-    animation: wrongFadeOut 0.5s forwards;
-  }
-  @keyframes correctPulse {
-    0% { box-shadow: 0 0 12px #3cb371, inset 0 0 10px #2e8b57; }
-    50% { box-shadow: 0 0 18px #55d37a, inset 0 0 18px #3cb371; }
-    100% { box-shadow: 0 0 12px #3cb371, inset 0 0 10px #2e8b57; }
-  }
-  @keyframes wrongFadeOut {
-    to {
-      opacity: 0;
-      transform: scale(0.8);
-      height: 0;
-      margin: 0;
-      padding: 0;
-      pointer-events: none;
-    }
-  }
-  #resetBtn {
-    margin-top: 36px;
-    background: #48c6ef;
-    color: #0f2027;
-    border: none;
-    border-radius: 30px;
-    padding: 14px 32px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    cursor: pointer;
-    box-shadow: 0 5px 15px #38a4e5;
-    transition: background-color 0.3s ease;
-    user-select: none;
-  }
-  #resetBtn:hover {
-    background-color: #2e8be6;
-  }
-  @media (max-width: 480px) {
-    #answers {
-      grid-template-columns: 1fr;
-    }
-    #question {
-      font-size: 1.5rem;
-      padding: 0 10px;
-    }
-  }
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<h1>Chọn nghĩa đúng của câu sau:</h1>
-<div id="score">Đúng: 0 / 0</div>
-<div id="question"></div>
-<div id="answers"></div>
-<button id="resetBtn">Làm lại bài quiz</button>
+    <link rel="stylesheet" href="style.css" />
 
-<!-- Âm thanh đúng & sai -->
-<audio id="correctSound" src="correct.mp3" preload="auto"></audio>
-<audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
+    <title>English Phrasal Verbs Quiz</title>
+
+  </head>
 
 
-<script>
-const url = "https://script.google.com/macros/s/AKfycbxAm9SvhJn5SEPYxGSysEuarr-liSh8EbiR79DR86LWWtVCh0pa7B7BMQlbCaY8WChUNA/exec";
+  <body>
 
-let data = [];
-let currentIndex = 0;
-let correctCount = 0;
-let totalCount = 0;
-let isfalse = 0;
+    <h1>Chọn nghĩa đúng của cụm động từ sau:</h1>
+    <div id="score">Đúng: 0 / 0</div>
+    <div id="question"></div>
+    <div id="answers"></div>
+    <button id="nextBtn" class="button" style="display:none;">Next</button>
+    <div>
+      <button id="preBtn" class="button">quay lại</button>
+      <button id="resetBtn" class="button">Làm lại bài quiz</button>
+    </div>
+    
 
-const scoreDiv = document.getElementById("score");
-const correctSound = document.getElementById("correctSound");
-const wrongSound = document.getElementById("wrongSound");
+    <!-- Âm thanh đúng & sai -->
+    <audio id="correctSound" src="correct.mp3" preload="auto"></audio>
+    <audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
 
-function updateScore() {
-  scoreDiv.textContent = `Đúng: ${correctCount} / ${totalCount - 1}`;
-}
+    <script src="script.js"></script>
 
-async function fetchData() {
-  const res = await fetch(url);
-  data = await res.json();
-  shuffle(data);
-  currentIndex = 0;
-  correctCount = 0;
-  totalCount = 0;
-  updateScore();
-  nextQuestion();
-}
-
-function shuffle(array) {
-  for (let i = array.length -1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
-
-function nextQuestion() {
-  if (currentIndex >= data.length) {
-    alert("🎉 Bạn đã hoàn thành bài quiz!");
-    currentIndex = 0;
-    shuffle(data);
-  }
-
-  const item = data[currentIndex];
-  currentIndex++;
-  totalCount++;
-  updateScore();
-
-  // Chọn ngẫu nhiên kiểu câu hỏi: 0 = ví dụ -> nghĩa | 1 = nghĩa -> phrasal verb
-  const questionType = Math.random() < 0.5 ? 0 : 1;
-
-  let correctAnswer = "";
-  let questionText = "";
-  let allAnswers = [];
-
-  if (questionType === 0) {
-    // Từ ví dụ => chọn đúng nghĩa
-    questionText = item.example;
-    correctAnswer = item.meaning;
-    const others = data.filter(d => d.meaning !== item.meaning);
-    shuffle(others);
-    allAnswers = [correctAnswer, ...others.slice(0, 3).map(d => d.meaning)];
-  } else {
-    // Từ nghĩa => chọn đúng phrasal verb
-    questionText = item.meaning;
-    correctAnswer = item.verb;
-    const others = data.filter(d => d.verb !== item.verb);
-    shuffle(others);
-    allAnswers = [correctAnswer, ...others.slice(0, 3).map(d => d.verb)];
-  }
-
-  shuffle(allAnswers);
-
-  document.getElementById("question").textContent = questionText;
-  const answersDiv = document.getElementById("answers");
-  answersDiv.innerHTML = "";
-
-  allAnswers.forEach(ans => {
-    const div = document.createElement("div");
-    div.textContent = ans;
-    div.className = "answer";
-    div.onclick = () => {
-      if (div.classList.contains("wrong") || div.classList.contains("correct")) {
-        // Đã chọn rồi, không làm gì nữa
-        return;
-      }
-      
-      if (ans === correctAnswer) {
-        // Khi chọn đúng thì khóa hết các đáp án
-        Array.from(answersDiv.children).forEach(child => child.style.pointerEvents = 'none');
-        div.classList.add("correct");
-        if(isfalse == 0) correctCount++;
-        else isfalse = 0;
-        updateScore();
-        correctSound.currentTime = 0;
-        correctSound.play().catch(() => {});
-        setTimeout(nextQuestion, 1000);
-      } else {
-        div.classList.add("wrong");
-        div.style.pointerEvents = "none";
-        wrongSound.currentTime = 0;
-        wrongSound.play().catch(() => {});
-        isfalse = 1;
-      }
-    };
-    answersDiv.appendChild(div);
-  });
-}
-
-
-document.getElementById('resetBtn').onclick = () => {
-  shuffle(data);
-  currentIndex = 0;
-  correctCount = 0;
-  totalCount = 0;
-  updateScore();
-  nextQuestion();
-};
-
-fetchData();
-</script>
-
-</body>
+  </body>
 </html>
