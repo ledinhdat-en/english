@@ -100,6 +100,10 @@
   .button:hover {
     background-color: #2e8be6;
   }
+  .row {
+    align-items: center;
+    margin-bottom: 24px;
+  }
 
   @media (max-width: 480px) {
     #answers {

@@ -72,6 +72,13 @@ function nextQuestion() {
     const answersDiv = document.getElementById("answers");
     answersDiv.innerHTML = "";
 
+    const speakBtn = document.getElementById("speakBtn");
+    speakBtn.style.display = questionType === 0 ? "inline-block" : "none";
+    speakBtn.onclick = () => {
+        const utterance = new SpeechSynthesisUtterance(item.verb);
+        utterance.lang = 'en-US';
+        speechSynthesis.speak(utterance);
+    };
     allAnswers.forEach(ans => {
         const div = document.createElement("div");
         div.textContent = ans;
@@ -93,6 +100,7 @@ function nextQuestion() {
                 correctSound.currentTime = 0;
                 correctSound.play().catch(() => {});
                 document.getElementById("nextBtn").style.display = "inline-block"; // hiện nút
+                speakBtn.style.display = "inline-block";
 
             } 
             else {
